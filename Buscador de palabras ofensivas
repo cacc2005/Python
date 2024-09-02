@@ -1,0 +1,40 @@
+import requests
+from bs4 import BeautifulSoup
+from plyer import notification
+
+# Lista de palabras ofensivas (puedes personalizarla)
+offensive_words = ["palabra1", "palabra2", "palabra3"]
+
+# URL de la web que quieres analizar
+url = "https://cnnespanol.cnn.com/2021/01/27/por-que-decir-palabrotas-es-un-signo-de-inteligencia-ayuda-a-controlar-el-dolor-y-mas"
+
+def check_offensive_content(url, offensive_words):
+    # Realiza una solicitud GET a la URL
+    response = requests.get(url)
+    
+    # Verifica si la solicitud fue exitosa
+    if response.status_code == 200:
+        # Analiza el contenido HTML con BeautifulSoup
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Extrae todo el texto de la página
+        page_text = soup.get_text().lower()
+        
+        # Busca palabras ofensivas en el texto
+        found_words = [word for word in offensive_words if word in page_text]
+        
+        if found_words:
+            # Si se encuentran palabras ofensivas, envía una notificación
+            notification.notify(
+                title="Alerta de contenido ofensivo",
+                message=f"Se encontraron las siguientes palabras ofensivas: {', '.join(found_words)}",
+                timeout=10
+            )
+            print(f"Palabras ofensivas encontradas: {', '.join(found_words)}")
+        else:
+            print("No se encontraron palabras ofensivas.")
+    else:
+        print(f"No se pudo acceder a la URL. Código de estado: {response.status_code}")
+
+# Llama a la función
+check_offensive_content(url, offensive_words)
